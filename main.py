@@ -2,6 +2,9 @@ from presidio_analyzer import AnalyzerEngine, RecognizerResult, EntityRecognizer
 from preprocessing import transform_keys
 import spacy
 import json
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 class PIIEntityRecognizer(EntityRecognizer):
     def __init__(self):
@@ -109,74 +112,35 @@ def pseudonymize_data(json_data, denial_list):
 
     return pseudonymized_data, mapping
 
+@app.route('/', methods=['POST'])
+def process_json():
+    # Get the JSON data from the request
+    input_json_2 = request.get_json()
+    
+    # # Convert JSON string to dictionary
+    json_data = dict(input_json_2)
 
-# # Example JSON input
-# input_json_2 = '''
-# {
-#   "Name": "Emily Brown",
-#   "Email": "emily.brown@example.com",
-#   "Phone": "+1 (555) 456-7890",
-#   "Address": "321 Pine St",
-#   "CreditCard": "9876543210987654",
-#   "SSN": "321-54-9876",
-#   "DriverLicense": "DL54321098765432",
-#   "Passport": "P4321567",
-#   "BankAccount": "1098765432",
-#   "UPI_ID": "emily.brown@upi",
-#   "Age": 33,
-#   "Gender": "Female",
-#   "Nationality": "AU",
-#   "Employment": "Employed",
-#   "Salary": 60000,
-#   "Company": "XYZ Corp",
-#   "MedicalRecord": "MR654321",
-#   "HealthInsurance": "54321",
-#   "Username": "emilybrown",
-#   "Password": "pa$$w0rd",
-#   "Website": "www.example.co",
-#   "ProductCode": "WXYZ8765",
-#   "TrackingNumber": "T543210987",
-#   "SocialMedia": "@emilybrown",
-#   "FavoriteColor": "Purple",
-#   "DateOfBirth": "1990-07-10",
-#   "FavoriteFood": "Pasta",
-#   "TravelDocument": "T43210987",
-#   "MemberID": "M654321",
-#   "DeviceSerialNumber": "SN0987654321",
-#   "TransactionID": "TXN543210",
-#   "IncomeTaxID": "IT98765",
-#   "UserIdentifier": "UID98765",
-#   "VehiclePlateNumber": "QWE543",
-#   "LibraryCardNumber": "LC65432",
-#   "CustomerID": "CUST543",
-#   "SubscriptionID": "SUBS543",
-#   "PostalCode": "56789",
-#   "EmergencyContact": "+1 (555) 789-0123",
-#   "FavoriteSport": "Baseball",
-#   "FavoriteMovie": "The Godfather",
-#   "RandomData1": "PQR321",
-#   "RandomData2": "LMN987",
-#   "RandomData3": "XYZ654",
-#   "RandomData4": "321CBA",
-#   "RandomData5": "987LMN"
-# }
-# '''
+    # List of keys to deny pseudonymization
+    denial_list = []
 
-# # Convert JSON string to dictionary
-# json_data = json.loads(input_json_2)
+    # Perform pseudonymization
+    pseudonymized_data, mapping = pseudonymize_data(json_data, denial_list)
 
-# # List of keys to deny pseudonymization
-# denial_list = []
+    # # Print pseudonymized data
+    # print("Pseudonymized Data:")
+    # for row in pseudonymized_data:
+    #     print(json.dumps(row, indent=2))
 
-# # Perform pseudonymization
-# pseudonymized_data, mapping = pseudonymize_data(json_data, denial_list)
+    # # Print mapping
+    # print("Mapping:")
+    # for value, key in mapping.items():
+    #     print(f"- {value}: {key}")
 
-# # Print pseudonymized data
-# print("Pseudonymized Data:")
-# for row in pseudonymized_data:
-#     print(json.dumps(row, indent=2))
+    # Perform some processing on the JSON data
+    # Here, we simply return the input JSON as it is
+    
+    # Return the processed JSON data
+    return jsonify(pseudonymized_data)
 
-# # Print mapping
-# print("Mapping:")
-# for value, key in mapping.items():
-#     print(f"- {value}: {key}")
+if __name__ == '__main__':
+    app.run(port=8000)
